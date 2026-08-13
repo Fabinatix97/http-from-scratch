@@ -38,6 +38,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // find a socket that we can connect to among the addresses that were
+    // returned by getaddrinf()
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         sfd = socket(rp->ai_family, rp->ai_socktype,
                 rp->ai_protocol);
@@ -57,6 +59,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // Read datagrams and echo them back to sender
     for (;;) {
         char host[NI_MAXHOST], service[NI_MAXSERV];
 
