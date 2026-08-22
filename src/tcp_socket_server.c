@@ -1,3 +1,4 @@
+#include <err.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -9,16 +10,19 @@
 #include <unistd.h>
 
 #define BUF_SIZE 500
+#define MAX_QUEUE_LENGTH 4
 
 int main(int argc, char *argv[])
 {
-    int sfd, s;
+    int sfd, s, cfd;
     char buf[BUF_SIZE];
     ssize_t nread;
     socklen_t peer_addrlen;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
-    struct sockaddr_storage peer_addr;
+    //struct sockaddr_storage peer_addr;
+    socklen_t peer_addr_size;
+    struct sockaddr peer_addr;
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s port\n", argv[0]);
@@ -28,7 +32,7 @@ int main(int argc, char *argv[])
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_PASSIVE;     // For wildcard IP address
     hints.ai_family = AF_UNSPEC;     // Allow IPv4 or IPv6
-    hints.ai_socktype = SOCK_STREAM; // Datagram socket
+    hints.ai_socktype = SOCK_STREAM; // Stream socket
     hints.ai_protocol = 0;           // Any protocol
     hints.ai_addr = NULL;
     hints.ai_canonname = NULL;
@@ -60,6 +64,26 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not bind\n");
         exit(EXIT_FAILURE);
     }
+
+    // listen = willing to accept incoming connections and a queue limit for incoming connections
+    if (listen(sfd, MAX_QUEUE_LENGTH) == -1) {
+        fprintf(stderr, "Can not listen\n");
+        exit(EXIT_FAILURE);
+    }
+
+
+    // accept incoming connections one at a time
+    peer_addr_size = sizeof(peer_addr);
+    cfd = accept(sfd, (struct sockaddr *) &peer_addr,
+            &peer_addr_size);
+    if (cfd == -1)
+        err(EXIT_FAILURE, "accept");
+
+    // Dealing with incoming connection(s)...
+    if (close(sfd) == -1)
+        err(EXIT_FAILURE, "close");
+    //if (unlink(MY_SOCK_PATH) == -1)
+    //    err(EXIT_FAILURE, "unlink");
 
     // Read byte stream and echo them back to sender
     for (;;) {

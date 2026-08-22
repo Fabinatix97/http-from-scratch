@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
     }
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_flags = 0;             // For wildcard IP address
-    hints.ai_family = AF_UNSPEC;    // Allow IPv4 or IPv6
-    hints.ai_socktype = SOCK_DGRAM; // Datagram socket
-    hints.ai_protocol = 0;          // Any protocol
+    hints.ai_flags = 0;              // For wildcard IP address
+    hints.ai_family = AF_UNSPEC;     // Allow IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM; // Stream socket
+    hints.ai_protocol = 0;           // Any protocol
 
     s = getaddrinfo(argv[1], argv[2], &hints, &result);
     if (s != 0) {
