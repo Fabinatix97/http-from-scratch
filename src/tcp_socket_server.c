@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
     socklen_t peer_addrlen;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
-    //struct sockaddr_storage peer_addr;
     socklen_t peer_addr_size;
     struct sockaddr peer_addr;
 
@@ -47,14 +46,11 @@ int main(int argc, char *argv[])
     // find an address that we can bind our socket to among the addresses that
     // were returned by getaddrinf()
     for (rp = result; rp != NULL; rp = rp->ai_next) {
-        sfd = socket(rp->ai_family, rp->ai_socktype,
-                rp->ai_protocol);
+        sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sfd == -1)
             continue;
-
         if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
             break;
-
         close(sfd);
     }
 
@@ -65,12 +61,12 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // listen = willing to accept incoming connections and a queue limit for incoming connections
+    // listen = willing to accept incoming connections
+    // backlog = a queue limit for incoming connections
     if (listen(sfd, MAX_QUEUE_LENGTH) == -1) {
         fprintf(stderr, "Can not listen\n");
         exit(EXIT_FAILURE);
     }
-
 
     // accept incoming connections one at a time
     peer_addr_size = sizeof(peer_addr);
@@ -79,35 +75,15 @@ int main(int argc, char *argv[])
     if (cfd == -1)
         err(EXIT_FAILURE, "accept");
 
-    // Dealing with incoming connection(s)...
-    if (close(sfd) == -1)
-        err(EXIT_FAILURE, "close");
-    //if (unlink(MY_SOCK_PATH) == -1)
-    //    err(EXIT_FAILURE, "unlink");
-
-    // Read byte stream and echo them back to sender
-    for (;;) {
-        char host[NI_MAXHOST], service[NI_MAXSERV];
-
-        peer_addrlen = sizeof(peer_addr);
-        nread = recvfrom(sfd, buf, BUF_SIZE, 0,
-                (struct sockaddr *) &peer_addr, &peer_addrlen);
-        if (nread == -1)
-            continue;
-
-        s = getnameinfo((struct sockaddr *) &peer_addr,
-                peer_addrlen, host, NI_MAXHOST,
-                service, NI_MAXSERV, NI_NUMERICSERV);
-        if (s == 0)
-            printf("Received %zd bytes from %s:%s\n",
-                    nread, host, service);
-        else
-            fprintf(stderr, "getnameinfo: %s\n", gai_strerror(s));
-
-        if (sendto(sfd, buf, nread, 0, (struct sockaddr *) &peer_addr,
-                    peer_addrlen) != nread)
-        {
-            fprintf(stderr, "Error sending response\n");
+    while ((nread = read(cfd, buf, sizeof(buf))) != 0) {
+        printf("Received %zd bytes\n", nread);
+        printf("Message: %s\n", buf);
+        if (nread < 0) {
+            fprintf(stderr, "Could not read socket\n");
+            exit(EXIT_FAILURE);
+        } else if (write(cfd, buf, nread) != nread) {
+            fprintf(stderr, "Could not write socket\n");
+            exit(EXIT_FAILURE);
         }
     }
 }
