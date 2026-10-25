@@ -35,8 +35,7 @@ int main(int argc, char *argv[])
     }
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
-        sfd = socket(rp->ai_family, rp->ai_socktype,
-                rp->ai_protocol);
+        sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sfd == -1)
             continue;
 
@@ -57,8 +56,7 @@ int main(int argc, char *argv[])
         size = strlen(argv[j]) + 1; // +1 for terminating null byte
 
         if (size > BUF_SIZE) {
-            fprintf(stderr,
-                    "Ignoring long message in argument %zu\n", j);
+            fprintf(stderr, "Ignoring long message in argument %zu\n", j);
             continue;
         }
 

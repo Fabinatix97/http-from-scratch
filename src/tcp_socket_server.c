@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
     int sfd, s, cfd;
     char buf[BUF_SIZE];
     ssize_t nread;
-    socklen_t peer_addrlen;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
-    socklen_t peer_addr_size;
     struct sockaddr peer_addr;
+    socklen_t peer_addrlen;
+    socklen_t peer_addr_size;
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s port\n", argv[0]);
@@ -70,8 +70,7 @@ int main(int argc, char *argv[])
 
     // accept incoming connections one at a time
     peer_addr_size = sizeof(peer_addr);
-    cfd = accept(sfd, (struct sockaddr *) &peer_addr,
-            &peer_addr_size);
+    cfd = accept(sfd, (struct sockaddr *) &peer_addr, &peer_addr_size);
     if (cfd == -1)
         err(EXIT_FAILURE, "accept");
 
