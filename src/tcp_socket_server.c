@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     if (cfd == -1)
         err(EXIT_FAILURE, "accept");
 
+    // read current file descriptor to buffer and print it
     while ((nread = read(cfd, buf, sizeof(buf))) != 0) {
         printf("Received %zd bytes\n", nread);
         printf("Message: %s\n", buf);

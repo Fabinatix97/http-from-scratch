@@ -34,14 +34,14 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // find an address that we can connect our socket to among the addresses
+    // that were returned by getaddrinf()
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sfd == -1)
             continue;
-
         if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
             break;
-
         close(sfd);
     }
 
@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // write messages to socket file descriptor one at a time
+    // first message is argv[3], subsequent messages may follow thereafter
     for (size_t j = 3; j < argc; j++) {
         size = strlen(argv[j]) + 1; // +1 for terminating null byte
 
@@ -60,11 +62,13 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        // write message to socket file descriptor
         if (write(sfd, argv[j], size) != size) {
             fprintf(stderr, "partial/failed write\n");
             exit(EXIT_FAILURE);
         }
 
+        // read message from socket file descriptor (optional)
         nread = read(sfd, buf, BUF_SIZE);
         if (nread == -1) {
             perror("read");
