@@ -15,7 +15,7 @@
 int main(int argc, char *argv[])
 {
     int sfd, s, cfd;
-    char buf[BUF_SIZE];
+    char buf[BUF_SIZE + 1];
     ssize_t nread, nwrite;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         err(EXIT_FAILURE, "accept");
 
     while (1) {
-        nread = read(cfd, buf, sizeof(buf));
+        nread = read(cfd, buf, BUF_SIZE);
         if (nread > 0) {
             buf[nread] = '\0';
             printf("Received %zd bytes: %s\n", nread, buf);
