@@ -1,4 +1,5 @@
 #include <err.h>
+#include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -11,6 +12,8 @@
 
 #define BUF_SIZE 500
 #define MAX_QUEUE_LENGTH 4
+
+ssize_t write_all(int fd, const void *buf, size_t count);
 
 int main(int argc, char *argv[])
 {
@@ -78,7 +81,7 @@ int main(int argc, char *argv[])
         if (nread > 0) {
             buf[nread] = '\0';
             printf("Received %zd bytes: %s\n", nread, buf);
-            nwrite = write(cfd, buf, nread);
+            nwrite = write_all(cfd, buf, nread);
             if (nwrite != nread) {
                 fprintf(stderr, "Could not write socket\n");
                 exit(EXIT_FAILURE);
@@ -98,4 +101,27 @@ int main(int argc, char *argv[])
     close(cfd);
     close(sfd);
     return(0);
+}
+
+ssize_t write_all(int fd, const void *buf, size_t count)
+{
+
+    size_t bytes_written = 0;
+
+    while (bytes_written < count) {
+        ssize_t n = write(fd, (const char *) buf + bytes_written, count - bytes_written);
+        if (n == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("write");
+            return(-1);
+        } else if (n == 0) {
+            fprintf(stderr, "Connection has been closed\n");
+            return(-1);
+        }
+        bytes_written += n;
+    }
+
+    return bytes_written;
 }
