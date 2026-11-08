@@ -16,11 +16,10 @@ int main(int argc, char *argv[])
 {
     int sfd, s, cfd;
     char buf[BUF_SIZE];
-    ssize_t nread;
+    ssize_t nread, nwrite;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     struct sockaddr peer_addr;
-    socklen_t peer_addrlen;
     socklen_t peer_addr_size;
 
     if (argc != 2) {
