@@ -87,8 +87,10 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Connection has been closed\n");
             break;
         } else if (nread == -1) {
-            perror("read");
-            fprintf(stderr, "Could not read socket\n");
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("write");
             break;
         }
     }
