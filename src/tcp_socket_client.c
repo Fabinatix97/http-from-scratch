@@ -78,5 +78,5 @@ int main(int argc, char *argv[])
         printf("Received %zd bytes: %s\n", nread, buf);
     }
 
-    exit(EXIT_SUCCESS);
+    return(0);
 }
