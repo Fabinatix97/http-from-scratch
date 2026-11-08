@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
     if (cfd == -1)
         err(EXIT_FAILURE, "accept");
 
-    while (nread = read(cfd, buf, sizeof(buf))) {
+    while (1) {
+        nread = read(cfd, buf, sizeof(buf));
         if (nread > 0) {
-            printf("HTTP/1.1 200 OK\n");
-            printf("Content-Length: %zd\n\n", nread - 1);
-            printf("%s\n", buf);
+            buf[nread] = '\0';
+            printf("Received %zd bytes: %s\n", nread, buf);
             nwrite = write(cfd, buf, nread);
             if (nwrite != nread) {
                 fprintf(stderr, "Could not write socket\n");
@@ -85,10 +85,11 @@ int main(int argc, char *argv[])
             }
         } else if (nread == 0) {
             fprintf(stderr, "Connection has been closed\n");
-            exit(EXIT_FAILURE);
+            break;
         } else if (nread == -1) {
+            perror("read");
             fprintf(stderr, "Could not read socket\n");
-            exit(EXIT_FAILURE);
+            break;
         }
     }
 
