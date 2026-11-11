@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,8 +72,11 @@ int main(int argc, char *argv[])
         // read message from socket file descriptor (optional)
         nread = read(sfd, buf, BUF_SIZE);
         if (nread == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
             perror("read");
-            exit(EXIT_FAILURE);
+            return(-1);
         }
 
         printf("Received %zd bytes: %s\n", nread, buf);
